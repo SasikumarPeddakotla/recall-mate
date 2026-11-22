@@ -1,0 +1,196 @@
+<div class="questions-container">
+  <header class="page-header">
+    <button class="back-button" (click)="goBack()">←</button>
+
+    <div class="header-info">
+      <h1>{{ category?.name }}</h1>
+      <p>{{ questions.length }} questions</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="bulk-button" (click)="openBulkForm()">Bulk add</button>
+
+      <button class="add-button" (click)="openCreateForm()">+</button>
+    </div>
+  </header>
+
+  <p class="success-message" *ngIf="bulkMessage && !showBulkForm">
+    {{ bulkMessage }}
+  </p>
+
+  <!-- Question form -->
+  <section class="form-card" *ngIf="showForm">
+    <h2>
+      {{ editingId !== null ? "Edit question" : "Add question" }}
+    </h2>
+
+    <label>Question</label>
+
+    <textarea
+      [(ngModel)]="questionText"
+      placeholder="Enter your question..."
+      rows="3"
+      maxlength="1000"
+    ></textarea>
+
+    <label>Answer</label>
+
+    <textarea
+      [(ngModel)]="answerText"
+      placeholder="Enter the correct answer..."
+      rows="2"
+      maxlength="1000"
+    ></textarea>
+
+    <label>Other acceptable answers (optional)</label>
+
+    <textarea
+      [(ngModel)]="acceptedAnswersText"
+      placeholder="Example: Dadabhai Nauroji, D. Naoroji"
+      rows="2"
+      maxlength="1000"
+    ></textarea>
+
+    <p class="field-hint">Separate alternative answers with commas.</p>
+
+    <div class="form-actions">
+      <button class="cancel-button" (click)="resetForm()">Cancel</button>
+
+      <button
+        class="save-button"
+        [disabled]="!questionText.trim() || !answerText.trim()"
+        (click)="saveQuestion()"
+      >
+        {{ editingId !== null ? "Update" : "Save question" }}
+      </button>
+    </div>
+  </section>
+
+  <!-- Bulk question form -->
+  <section class="bulk-form" *ngIf="showBulkForm">
+    <div class="bulk-header">
+      <div>
+        <h2>Bulk add questions</h2>
+        <p>Add multiple questions at once.</p>
+      </div>
+
+      <button class="close-button" (click)="closeBulkForm()">✕</button>
+    </div>
+
+    <article
+      class="bulk-question-card"
+      *ngFor="let item of bulkQuestions; let i = index"
+    >
+      <div class="bulk-question-header">
+        <h3>Question {{ i + 1 }}</h3>
+
+        <button
+          class="remove-button"
+          *ngIf="bulkQuestions.length > 1"
+          (click)="removeBulkQuestion(i)"
+        >
+          Remove
+        </button>
+      </div>
+
+      <label>Question</label>
+
+      <textarea
+        [(ngModel)]="item.question"
+        placeholder="Enter your question..."
+        rows="3"
+        maxlength="1000"
+      ></textarea>
+
+      <label>Answer</label>
+
+      <textarea
+        [(ngModel)]="item.answer"
+        placeholder="Enter the correct answer..."
+        rows="2"
+        maxlength="1000"
+      ></textarea>
+
+      <label>Other acceptable answers (optional)</label>
+
+      <textarea
+        [(ngModel)]="acceptedAnswersText"
+        placeholder="Example: Dadabhai Nauroji, D. Naoroji"
+        rows="2"
+        maxlength="1000"
+      ></textarea>
+
+      <p class="field-hint">Separate alternative answers with commas.</p>
+    </article>
+
+    <button class="add-another-button" (click)="addBulkQuestion()">
+      + Add another question
+    </button>
+
+    <div class="bulk-actions">
+      <button class="cancel-button" (click)="closeBulkForm()">Cancel</button>
+
+      <button
+        class="save-button"
+        [disabled]="isBulkSaving"
+        (click)="saveBulkQuestions()"
+      >
+        {{ isBulkSaving ? "Saving..." : "Save all questions" }}
+      </button>
+    </div>
+
+    <p class="field-hint" *ngIf="bulkMessage">
+      {{ bulkMessage }}
+    </p>
+  </section>
+
+  <!-- Empty state -->
+  <section class="empty-state" *ngIf="questions.length === 0 && !showForm">
+    <div class="empty-icon">✍️</div>
+
+    <h2>No questions yet</h2>
+
+    <p>
+      Start adding questions to this category. You can practise them whenever
+      you want.
+    </p>
+
+    <button class="add-button" (click)="openCreateForm()">+</button>
+  </section>
+
+  <button
+    class="practice-button"
+    *ngIf="questions.length > 0"
+    (click)="startPractice()"
+  >
+    Start practice →
+  </button>
+
+  <!-- Questions list -->
+  <section class="question-list">
+    <article
+      class="question-card"
+      *ngFor="let item of questions; let i = index"
+    >
+      <div class="question-number">
+        {{ i + 1 }}
+      </div>
+
+      <div class="question-content">
+        <h3>{{ item.question }}</h3>
+
+        <p class="answer-preview">
+          {{ item.answer }}
+        </p>
+
+        <div class="question-actions">
+          <button (click)="openEditForm(item)">Edit</button>
+
+          <button class="delete-button" (click)="deleteQuestion(item)">
+            Delete
+          </button>
+        </div>
+      </div>
+    </article>
+  </section>
+</div>

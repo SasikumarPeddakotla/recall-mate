@@ -1,0 +1,94 @@
+<div class="categories-container">
+  <header class="page-header">
+    <button class="back-button" (click)="goBack()">←</button>
+
+    <div>
+      <h1>Categories</h1>
+      <p>Organise your questions by topic</p>
+    </div>
+
+    <button class="add-button" (click)="openCreateForm()">+</button>
+  </header>
+
+  <!-- Create / Edit form -->
+  <section class="form-card" *ngIf="showForm">
+    <h2>
+      {{ editingId !== null ? "Edit category" : "New category" }}
+    </h2>
+
+    <label>Category name</label>
+    <input
+      type="text"
+      [(ngModel)]="categoryName"
+      placeholder="e.g. Modern History"
+      maxlength="60"
+    />
+
+    <label>Description (optional)</label>
+    <textarea
+      [(ngModel)]="categoryDescription"
+      placeholder="e.g. Authors and Books"
+      rows="3"
+      maxlength="200"
+    ></textarea>
+
+    <div class="form-actions">
+      <button class="cancel-button" (click)="resetForm()">Cancel</button>
+
+      <button
+        class="save-button"
+        [disabled]="!categoryName.trim()"
+        (click)="saveCategory()"
+      >
+        {{ editingId !== null ? "Update" : "Create category" }}
+      </button>
+    </div>
+  </section>
+
+  <!-- Category list -->
+  <section class="category-list">
+    <div class="empty-state" *ngIf="categories.length === 0">
+      <div class="empty-icon">📚</div>
+      <h2>No categories yet</h2>
+      <p>Create your first category to organise your questions.</p>
+
+      <button class="save-button" (click)="openCreateForm()">
+        Create category
+      </button>
+    </div>
+
+    <article class="category-card" *ngFor="let category of categories">
+      <div class="category-info">
+        <h3 (click)="openCategory(category)">
+          {{ category.name }}
+        </h3>
+
+        <p *ngIf="category.description">
+          {{ category.description }}
+        </p>
+
+        <span class="date">
+          Created {{ category.createdAt | date: "mediumDate" }}
+        </span>
+      </div>
+
+      <div class="category-actions">
+        <button
+          class="icon-button"
+          aria-label="Edit category"
+          (click)="openEditForm(category)"
+        >
+          ✎
+        </button>
+
+        <button
+          class="icon-button delete-button"
+          aria-label="Delete category"
+          (click)="deleteCategory(category)"
+        >
+          ×
+        </button>
+      </div>
+    </article>
+  </section>
+</div>

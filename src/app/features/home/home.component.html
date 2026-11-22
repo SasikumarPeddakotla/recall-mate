@@ -1,0 +1,93 @@
+<div class="home-container">
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">R</div>
+      <span>RecallMate</span>
+    </div>
+
+    <!-- <button class="profile-button" aria-label="Profile">
+      <span>U</span>
+    </button> -->
+  </header>
+
+  <section class="welcome-section">
+    <p class="greeting">YOUR PERSONAL PRACTICE PARTNER</p>
+
+    <h1>
+      Train your memory.<br />
+      <span>One question at a time.</span>
+    </h1>
+
+    <p class="description">
+      Create your own question collections and practise whenever you want.
+    </p>
+  </section>
+
+  <!-- Dashboard statistics -->
+  <section class="stats-section">
+    <div class="stat-card">
+      <span class="stat-value">{{ totalCategories }}</span>
+      <span class="stat-label">Categories</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-value">{{ totalQuestions }}</span>
+      <span class="stat-label">Questions</span>
+    </div>
+  </section>
+
+  <!-- Category list -->
+  <section class="categories-section">
+    <div class="section-header">
+      <div>
+        <h2>Your categories</h2>
+        <p>Choose a topic to practise</p>
+      </div>
+
+      <button class="add-button" (click)="createCategory()">+ Create</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      Loading your categories...
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="!isLoading && categories.length === 0">
+      <div class="empty-icon">📚</div>
+
+      <h3>Your question bank is empty</h3>
+
+      <p>
+        Create your first category and start building your personal question
+        bank.
+      </p>
+
+      <button class="primary-button" (click)="createCategory()">
+        Create your first category
+      </button>
+    </div>
+
+    <!-- Actual categories -->
+    <div class="category-list" *ngIf="!isLoading && categories.length > 0">
+      <article
+        class="category-card"
+        *ngFor="let item of categories"
+        (click)="openCategory(item.category)"
+      >
+        <div class="category-icon">📖</div>
+
+        <div class="category-info">
+          <h3>{{ item.category.name }}</h3>
+
+          <p>
+            {{ item.questionCount }}
+            {{ item.questionCount === 1 ? "question" : "questions" }}
+          </p>
+        </div>
+
+        <span class="category-arrow">›</span>
+      </article>
+    </div>
+  </section>
+</div>
