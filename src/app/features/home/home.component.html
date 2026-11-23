@@ -80,6 +80,10 @@
         <div class="category-info">
           <h3>{{ item.category.name }}</h3>
 
+          <p *ngIf="item.category.description">
+            {{ item.category.description }}
+          </p>
+
           <p>
             {{ item.questionCount }}
             {{ item.questionCount === 1 ? "question" : "questions" }}
