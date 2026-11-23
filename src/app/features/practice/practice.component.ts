@@ -61,24 +61,26 @@ export class PracticeComponent implements OnInit {
     }
 
     const savedQuestions = await this.questionService.getByCategory(id);
+
     this.questions = this.shuffleQuestions(savedQuestions);
     this.isLoading = false;
-
-    if (this.questions.length === 0) {
-      return;
-    }
   }
 
+  // Returns the currently displayed question.
   get currentQuestion(): Question | undefined {
     return this.questions[this.currentIndex];
   }
 
+  // Calculates progress through the practice session.
   get progress(): number {
-    if (this.questions.length === 0) return 0;
+    if (this.questions.length === 0) {
+      return 0;
+    }
 
     return ((this.currentIndex + 1) / this.questions.length) * 100;
   }
 
+  // Checks the user's answer against the correct and accepted answers.
   checkAnswer(): void {
     if (!this.userAnswer.trim() || this.hasChecked || this.hasSkipped) {
       return;
@@ -108,10 +110,17 @@ export class PracticeComponent implements OnInit {
     }
   }
 
+  // Reveals the correct answer and records the question as skipped.
   revealAnswer(): void {
+    if (this.hasChecked || this.hasSkipped) {
+      return;
+    }
+
     this.answerRevealed = true;
+    this.skipQuestion();
   }
 
+  // Moves to the next question or completes the session.
   nextQuestion(): void {
     if (!this.hasChecked && !this.hasSkipped) {
       return;
@@ -125,6 +134,7 @@ export class PracticeComponent implements OnInit {
     }
   }
 
+  // Resets the state for the next question.
   resetCurrentQuestion(): void {
     this.userAnswer = '';
     this.hasChecked = false;
@@ -133,6 +143,7 @@ export class PracticeComponent implements OnInit {
     this.isCorrect = false;
   }
 
+  // Restarts the practice session with shuffled questions.
   restartPractice(): void {
     this.questions = this.shuffleQuestions(this.questions);
 
@@ -144,10 +155,12 @@ export class PracticeComponent implements OnInit {
     this.resetCurrentQuestion();
   }
 
+  // Navigates back to the category's question list.
   goBack(): void {
     this.router.navigate(['/categories', this.categoryId, 'questions']);
   }
 
+  // Normalizes answers before comparing them.
   private normalize(value: string): string {
     return value
       .normalize('NFD')
@@ -158,6 +171,7 @@ export class PracticeComponent implements OnInit {
       .replace(/\s+/g, ' ');
   }
 
+  // Randomizes the question order using Fisher-Yates shuffle.
   private shuffleQuestions(questions: Question[]): Question[] {
     const shuffled = [...questions];
 
@@ -170,6 +184,7 @@ export class PracticeComponent implements OnInit {
     return shuffled;
   }
 
+  // Result counts.
   get correctCount(): number {
     return this.results.filter((item) => item.status === 'correct').length;
   }
@@ -182,6 +197,7 @@ export class PracticeComponent implements OnInit {
     return this.results.filter((item) => item.status === 'skipped').length;
   }
 
+  // Skips the current question and records it in the results.
   skipQuestion(): void {
     if (this.hasChecked || this.hasSkipped) {
       return;

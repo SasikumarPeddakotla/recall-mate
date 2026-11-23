@@ -23,6 +23,9 @@ import {
 export class CategoriesComponent implements OnInit {
   categories: Category[] = [];
 
+  // Category search
+  searchTerm = '';
+
   showForm = false;
   editingId: number | null = null;
 
@@ -57,6 +60,27 @@ export class CategoriesComponent implements OnInit {
 
   async loadCategories(): Promise<void> {
     this.categories = await this.categoryService.getAll();
+  }
+
+  // Returns categories matching the search term.
+  get filteredCategories(): Category[] {
+    const term = this.searchTerm.trim().toLowerCase();
+
+    if (!term) {
+      return this.categories;
+    }
+
+    return this.categories.filter((category) => {
+      const name = category.name.toLowerCase();
+      const description = (category.description ?? '').toLowerCase();
+
+      return name.includes(term) || description.includes(term);
+    });
+  }
+
+  // Clears the category search.
+  clearSearch(): void {
+    this.searchTerm = '';
   }
 
   openCreateForm(): void {
@@ -182,6 +206,7 @@ export class CategoriesComponent implements OnInit {
           categoryName,
           categoryDescription,
         );
+
         targetCategoryName = categoryName;
       } else {
         targetCategoryId = this.importTargetCategoryId!;

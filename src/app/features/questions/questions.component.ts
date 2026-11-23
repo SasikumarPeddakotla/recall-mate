@@ -33,6 +33,9 @@ export class QuestionsComponent implements OnInit {
 
   questions: Question[] = [];
 
+  // Question search
+  searchTerm = '';
+
   showForm = false;
   editingId: number | null = null;
 
@@ -97,6 +100,33 @@ export class QuestionsComponent implements OnInit {
 
   async loadQuestions(): Promise<void> {
     this.questions = await this.questionService.getByCategory(this.categoryId);
+  }
+
+  // Returns questions matching the search term.
+  get filteredQuestions(): Question[] {
+    const term = this.searchTerm.trim().toLowerCase();
+
+    if (!term) {
+      return this.questions;
+    }
+
+    return this.questions.filter((item) => {
+      const question = item.question.toLowerCase();
+      const answer = item.answer.toLowerCase();
+
+      const acceptedAnswers = (item.acceptedAnswers ?? []).some(
+        (acceptedAnswer) => acceptedAnswer.toLowerCase().includes(term),
+      );
+
+      return (
+        question.includes(term) || answer.includes(term) || acceptedAnswers
+      );
+    });
+  }
+
+  // Clears the question search.
+  clearSearch(): void {
+    this.searchTerm = '';
   }
 
   async exportQuestions(): Promise<void> {

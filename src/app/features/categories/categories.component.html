@@ -1,6 +1,14 @@
 <div class="categories-container">
+  <!-- Header -->
   <header class="page-header">
-    <button class="back-button" (click)="goBack()">←</button>
+    <button
+      class="back-button"
+      type="button"
+      (click)="goBack()"
+      aria-label="Go back"
+    >
+      ←
+    </button>
 
     <div class="header-info">
       <h1>Categories</h1>
@@ -8,14 +16,26 @@
     </div>
 
     <div class="header-actions">
-      <button class="bulk-button" (click)="showImportForm = !showImportForm">
+      <button
+        class="bulk-button"
+        type="button"
+        (click)="showImportForm = !showImportForm"
+      >
         Import
       </button>
 
-      <button class="add-button" (click)="openCreateForm()">+</button>
+      <button
+        class="add-button"
+        type="button"
+        (click)="openCreateForm()"
+        aria-label="Create category"
+      >
+        +
+      </button>
     </div>
   </header>
 
+  <!-- Import success message -->
   <p class="success-message" *ngIf="importMessage">
     {{ importMessage }}
   </p>
@@ -54,6 +74,7 @@
 
       <div class="import-file-info" *ngIf="importQuestions.length > 0">
         <span class="file-icon">📄</span>
+
         <div>
           <strong>{{ importQuestions.length }} questions found</strong>
           <p>File validated and ready to import.</p>
@@ -103,8 +124,10 @@
           maxlength="60"
         />
 
-        <label>Description (optional)</label>
+        <label for="new-import-description">Description (optional)</label>
+
         <textarea
+          id="new-import-description"
           [(ngModel)]="newImportCategoryDescription"
           placeholder="e.g. Authors and Books"
           rows="3"
@@ -138,22 +161,26 @@
     </div>
   </section>
 
-  <!-- Create / Edit form -->
+  <!-- Create / Edit category form -->
   <section class="form-card" *ngIf="showForm">
     <h2>
       {{ editingId !== null ? "Edit category" : "New category" }}
     </h2>
 
-    <label>Category name</label>
+    <label for="category-name">Category name</label>
+
     <input
+      id="category-name"
       type="text"
       [(ngModel)]="categoryName"
       placeholder="e.g. Modern History"
       maxlength="60"
     />
 
-    <label>Description (optional)</label>
+    <label for="category-description">Description (optional)</label>
+
     <textarea
+      id="category-description"
       [(ngModel)]="categoryDescription"
       placeholder="e.g. Authors and Books"
       rows="3"
@@ -161,9 +188,12 @@
     ></textarea>
 
     <div class="form-actions">
-      <button class="cancel-button" (click)="resetForm()">Cancel</button>
+      <button type="button" class="cancel-button" (click)="resetForm()">
+        Cancel
+      </button>
 
       <button
+        type="button"
         class="save-button"
         [disabled]="!categoryName.trim()"
         (click)="saveCategory()"
@@ -173,19 +203,70 @@
     </div>
   </section>
 
+  <!-- Category search -->
+  <section class="category-search" *ngIf="categories.length > 0">
+    <div class="search-input-wrapper">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="Search categories..."
+        aria-label="Search categories by name or description"
+        autocomplete="off"
+      />
+
+      <button
+        *ngIf="searchTerm"
+        type="button"
+        class="clear-search-button"
+        (click)="clearSearch()"
+        aria-label="Clear category search"
+      >
+        ×
+      </button>
+    </div>
+
+    <p class="search-count" *ngIf="searchTerm.trim()">
+      {{ filteredCategories.length }}
+      {{ filteredCategories.length === 1 ? "category" : "categories" }}
+      found
+    </p>
+  </section>
+
   <!-- Category list -->
   <section class="category-list">
+    <!-- No categories at all -->
     <div class="empty-state" *ngIf="categories.length === 0">
       <div class="empty-icon">📚</div>
+
       <h2>No categories yet</h2>
+
       <p>Create your first category to organise your questions.</p>
 
-      <button class="save-button" (click)="openCreateForm()">
+      <button type="button" class="save-button" (click)="openCreateForm()">
         Create category
       </button>
     </div>
 
-    <article class="category-card" *ngFor="let category of categories">
+    <!-- No search matches -->
+    <div
+      class="empty-state"
+      *ngIf="categories.length > 0 && filteredCategories.length === 0"
+    >
+      <div class="empty-icon">🔍</div>
+
+      <h2>No matching categories</h2>
+
+      <p>We couldn't find any categories matching "{{ searchTerm }}".</p>
+
+      <button type="button" class="save-button" (click)="clearSearch()">
+        Clear search
+      </button>
+    </div>
+
+    <!-- Matching categories -->
+    <article class="category-card" *ngFor="let category of filteredCategories">
       <div class="category-info">
         <h3 (click)="openCategory(category)">
           {{ category.name }}
@@ -202,6 +283,7 @@
 
       <div class="category-actions">
         <button
+          type="button"
           class="icon-button"
           aria-label="Edit category"
           (click)="openEditForm(category)"
@@ -210,6 +292,7 @@
         </button>
 
         <button
+          type="button"
           class="icon-button delete-button"
           aria-label="Delete category"
           (click)="deleteCategory(category)"

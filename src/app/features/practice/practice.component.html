@@ -1,6 +1,14 @@
 <div class="practice-container">
+  <!-- Header -->
   <header class="practice-header">
-    <button class="back-button" (click)="goBack()">←</button>
+    <button
+      class="back-button"
+      type="button"
+      (click)="goBack()"
+      aria-label="Back to questions"
+    >
+      ←
+    </button>
 
     <div class="header-info">
       <p>NOW PRACTISING</p>
@@ -8,22 +16,34 @@
     </div>
   </header>
 
+  <!-- Loading state -->
   <div class="loading-state" *ngIf="isLoading">Loading questions...</div>
 
+  <!-- Empty state -->
   <section class="empty-state" *ngIf="!isLoading && questions.length === 0">
     <div class="empty-icon">📚</div>
+
     <h2>No questions available</h2>
+
     <p>Add some questions to this category before practising.</p>
-    <button class="primary-button" (click)="goBack()">Back to questions</button>
+
+    <button class="primary-button" type="button" (click)="goBack()">
+      Back to questions
+    </button>
   </section>
 
   <ng-container *ngIf="!isLoading && questions.length > 0">
     <!-- Practice completed -->
-    <section class="results-section" *ngIf="isCompleted">
+    <section
+      class="results-section"
+      *ngIf="isCompleted"
+      aria-label="Practice results"
+    >
       <div class="completion-card">
         <div class="completion-icon">🎉</div>
 
         <p class="eyebrow">PRACTICE COMPLETED</p>
+
         <h2>Session summary</h2>
 
         <div class="score-display">
@@ -36,6 +56,7 @@
           {{ questions.length }} questions correctly.
         </p>
 
+        <!-- Result statistics -->
         <div class="result-stats">
           <div class="result-stat correct-stat">
             <strong>{{ correctCount }}</strong>
@@ -53,18 +74,24 @@
           </div>
         </div>
 
-        <button class="primary-button" (click)="restartPractice()">
+        <button
+          class="primary-button"
+          type="button"
+          (click)="restartPractice()"
+        >
           Practise again
         </button>
 
-        <button class="secondary-button" (click)="goBack()">
+        <button class="secondary-button" type="button" (click)="goBack()">
           Back to questions
         </button>
       </div>
 
-      <section class="review-section">
+      <!-- Answer review -->
+      <section class="review-section" aria-label="Review your answers">
         <div class="review-heading">
           <h2>Review your answers</h2>
+
           <p>See what you got right and what needs more practice.</p>
         </div>
 
@@ -74,7 +101,7 @@
           [ngClass]="result.status"
         >
           <div class="review-card-header">
-            <span class="review-number">Question {{ i + 1 }}</span>
+            <span class="review-number"> Question {{ i + 1 }} </span>
 
             <span class="review-status" [ngClass]="result.status">
               {{ result.status | titlecase }}
@@ -96,87 +123,130 @@
       </section>
     </section>
 
-    <!-- Active question -->
+    <!-- Active practice question -->
     <ng-container *ngIf="!isCompleted && currentQuestion">
+      <!-- Progress indicator -->
       <section class="progress-section">
         <div class="progress-label">
-          <span>Question {{ currentIndex + 1 }} of {{ questions.length }}</span>
-          <span>{{ score }} correct</span>
+          <div class="question-progress">
+            <strong>{{ currentIndex + 1 }}</strong>
+            <span>of {{ questions.length }} questions</span>
+          </div>
+
+          <div class="score-progress">
+            <span class="score-dot"></span>
+            <span>{{ score }} correct</span>
+          </div>
         </div>
 
-        <div class="progress-track">
+        <div
+          class="progress-track"
+          role="progressbar"
+          [attr.aria-valuenow]="currentIndex + 1"
+          [attr.aria-valuemin]="1"
+          [attr.aria-valuemax]="questions.length"
+          [attr.aria-label]="
+            'Question ' + (currentIndex + 1) + ' of ' + questions.length
+          "
+        >
           <div class="progress-fill" [style.width.%]="progress"></div>
         </div>
       </section>
 
+      <!-- Question -->
       <section class="question-card">
         <p class="eyebrow">YOUR QUESTION</p>
+
         <h2>{{ currentQuestion.question }}</h2>
       </section>
 
+      <!-- Answer section -->
       <section class="answer-section">
         <label for="answer-input">Your answer</label>
 
         <textarea
           id="answer-input"
           [(ngModel)]="userAnswer"
-          [disabled]="hasChecked"
+          [disabled]="hasChecked || hasSkipped"
           placeholder="Type your answer here..."
           rows="3"
           maxlength="1000"
+          aria-label="Enter your answer"
         ></textarea>
 
+        <!-- Check answer -->
         <button
           class="check-button"
-          *ngIf="!hasChecked"
+          type="button"
+          *ngIf="!hasChecked && !hasSkipped"
           [disabled]="!userAnswer.trim()"
           (click)="checkAnswer()"
         >
           Check answer
         </button>
 
-        <div class="feedback-card correct" *ngIf="hasChecked && isCorrect">
+        <!-- Correct feedback -->
+        <div
+          class="feedback-card correct"
+          *ngIf="hasChecked && isCorrect"
+          aria-live="polite"
+        >
           <span class="feedback-icon">✓</span>
+
           <div>
             <h3>Correct answer!</h3>
             <p>Great job. Keep going!</p>
           </div>
         </div>
 
-        <div class="feedback-card incorrect" *ngIf="hasChecked && !isCorrect">
+        <!-- Incorrect feedback -->
+        <div
+          class="feedback-card incorrect"
+          *ngIf="hasChecked && !isCorrect"
+          aria-live="polite"
+        >
           <span class="feedback-icon">✕</span>
+
           <div>
             <h3>Not quite right</h3>
             <p>Don't worry. Keep practising!</p>
           </div>
         </div>
 
+        <!-- Revealed correct answer -->
         <div
           class="reveal-card"
           *ngIf="answerRevealed || (hasChecked && !isCorrect) || hasSkipped"
+          aria-live="polite"
         >
           <p>Correct answer</p>
           <h3>{{ currentQuestion.answer }}</h3>
         </div>
 
+        <!-- Show answer -->
         <button
           class="reveal-button"
+          type="button"
           *ngIf="!answerRevealed && !hasChecked && !hasSkipped"
           (click)="revealAnswer()"
         >
           Show answer
         </button>
 
+        <!-- Skip question -->
         <button
           class="skip-button"
+          type="button"
           *ngIf="!hasChecked && !hasSkipped"
           (click)="skipQuestion()"
         >
           Skip this question
         </button>
 
+        <!-- Next question -->
         <button
           class="next-button"
+          type="button"
           *ngIf="hasChecked || hasSkipped"
           (click)="nextQuestion()"
         >

@@ -1,6 +1,14 @@
 <div class="questions-container">
+  <!-- Header -->
   <header class="page-header">
-    <button class="back-button" (click)="goBack()">←</button>
+    <button
+      class="back-button"
+      type="button"
+      (click)="goBack()"
+      aria-label="Back to categories"
+    >
+      ←
+    </button>
 
     <div class="header-info">
       <h1>{{ category?.name }}</h1>
@@ -11,6 +19,7 @@
       <div class="menu-wrapper">
         <button
           class="menu-button"
+          type="button"
           (click)="showHeaderMenu = !showHeaderMenu"
           aria-label="More actions"
           [attr.aria-expanded]="showHeaderMenu"
@@ -20,26 +29,49 @@
 
         @if (showHeaderMenu) {
           <div class="header-menu">
-            <button (click)="showHeaderMenu = false; openBulkForm()">
+            <button
+              type="button"
+              (click)="showHeaderMenu = false; openBulkForm()"
+            >
               Bulk add
             </button>
 
             <button
+              type="button"
               (click)="showHeaderMenu = false; showImportForm = !showImportForm"
             >
               Import
             </button>
 
-            <button (click)="showHeaderMenu = false; exportQuestions()">
+            <button
+              type="button"
+              (click)="showHeaderMenu = false; exportQuestions()"
+            >
               Export
             </button>
           </div>
         }
       </div>
 
-      <button class="add-button" (click)="openCreateForm()">+</button>
+      <button
+        class="add-button"
+        type="button"
+        (click)="openCreateForm()"
+        aria-label="Add question"
+      >
+        +
+      </button>
     </div>
   </header>
+
+  <!-- Success messages -->
+  <p class="success-message" *ngIf="importMessage">
+    {{ importMessage }}
+  </p>
+
+  <p class="success-message" *ngIf="bulkMessage && !showBulkForm">
+    {{ bulkMessage }}
+  </p>
 
   <!-- Import questions form -->
   <section class="form-card import-card" *ngIf="showImportForm">
@@ -107,41 +139,36 @@
     </div>
   </section>
 
-  <p class="success-message" *ngIf="importMessage">
-    {{ importMessage }}
-  </p>
-
-  <p class="success-message" *ngIf="bulkMessage && !showBulkForm">
-    {{ bulkMessage }}
-  </p>
-
-  <!-- Question form -->
+  <!-- Create / Edit question form -->
   <section class="form-card" *ngIf="showForm">
     <h2>
       {{ editingId !== null ? "Edit question" : "Add question" }}
     </h2>
 
-    <label>Question</label>
+    <label for="question-text">Question</label>
 
     <textarea
+      id="question-text"
       [(ngModel)]="questionText"
       placeholder="Enter your question..."
       rows="3"
       maxlength="1000"
     ></textarea>
 
-    <label>Answer</label>
+    <label for="answer-text">Answer</label>
 
     <textarea
+      id="answer-text"
       [(ngModel)]="answerText"
       placeholder="Enter the correct answer..."
       rows="2"
       maxlength="1000"
     ></textarea>
 
-    <label>Other acceptable answers (optional)</label>
+    <label for="accepted-answers"> Other acceptable answers (optional) </label>
 
     <textarea
+      id="accepted-answers"
       [(ngModel)]="acceptedAnswersText"
       placeholder="Example: Dadabhai Nauroji, D. Naoroji"
       rows="2"
@@ -151,9 +178,12 @@
     <p class="field-hint">Separate alternative answers with commas.</p>
 
     <div class="form-actions">
-      <button class="cancel-button" (click)="resetForm()">Cancel</button>
+      <button type="button" class="cancel-button" (click)="resetForm()">
+        Cancel
+      </button>
 
       <button
+        type="button"
         class="save-button"
         [disabled]="!questionText.trim() || !answerText.trim()"
         (click)="saveQuestion()"
@@ -171,7 +201,14 @@
         <p>Add multiple questions at once.</p>
       </div>
 
-      <button class="close-button" (click)="closeBulkForm()">✕</button>
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Close bulk form"
+        (click)="closeBulkForm()"
+      >
+        ✕
+      </button>
     </div>
 
     <article
@@ -182,6 +219,7 @@
         <h3>Question {{ i + 1 }}</h3>
 
         <button
+          type="button"
           class="remove-button"
           *ngIf="bulkQuestions.length > 1"
           (click)="removeBulkQuestion(i)"
@@ -220,14 +258,21 @@
       <p class="field-hint">Separate alternative answers with commas.</p>
     </article>
 
-    <button class="add-another-button" (click)="addBulkQuestion()">
+    <button
+      type="button"
+      class="add-another-button"
+      (click)="addBulkQuestion()"
+    >
       + Add another question
     </button>
 
     <div class="bulk-actions">
-      <button class="cancel-button" (click)="closeBulkForm()">Cancel</button>
+      <button type="button" class="cancel-button" (click)="closeBulkForm()">
+        Cancel
+      </button>
 
       <button
+        type="button"
         class="save-button"
         [disabled]="isBulkSaving"
         (click)="saveBulkQuestions()"
@@ -241,7 +286,7 @@
     </p>
   </section>
 
-  <!-- Empty state -->
+  <!-- Empty category state -->
   <section class="empty-state" *ngIf="questions.length === 0 && !showForm">
     <div class="empty-icon">✍️</div>
 
@@ -252,22 +297,73 @@
       you want.
     </p>
 
-    <button class="add-button" (click)="openCreateForm()">+</button>
+    <button type="button" class="add-button" (click)="openCreateForm()">
+      +
+    </button>
   </section>
 
+  <!-- No search matches -->
+  <section
+    class="empty-state"
+    *ngIf="questions.length > 0 && filteredQuestions.length === 0"
+  >
+    <div class="empty-icon">🔍</div>
+
+    <h2>No matching questions</h2>
+
+    <p>We couldn't find any questions matching "{{ searchTerm }}".</p>
+
+    <button type="button" class="save-button" (click)="clearSearch()">
+      Clear search
+    </button>
+  </section>
+
+  <!-- Start practice -->
   <button
     class="practice-button"
+    type="button"
     *ngIf="questions.length > 0"
     (click)="startPractice()"
   >
     Start practice →
   </button>
 
-  <!-- Questions list -->
+  <!-- Question search -->
+  <section class="question-search" *ngIf="questions.length > 0">
+    <div class="search-input-wrapper">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="Search questions or answers..."
+        aria-label="Search questions, answers, and alternative answers"
+        autocomplete="off"
+      />
+
+      <button
+        *ngIf="searchTerm"
+        type="button"
+        class="clear-search-button"
+        (click)="clearSearch()"
+        aria-label="Clear question search"
+      >
+        ×
+      </button>
+    </div>
+
+    <p class="search-count" *ngIf="searchTerm.trim()">
+      {{ filteredQuestions.length }}
+      {{ filteredQuestions.length === 1 ? "question" : "questions" }}
+      found
+    </p>
+  </section>
+
+  <!-- Filtered question list -->
   <section class="question-list">
     <article
       class="question-card"
-      *ngFor="let item of questions; let i = index"
+      *ngFor="let item of filteredQuestions; let i = index"
     >
       <div class="question-number">
         {{ i + 1 }}
@@ -281,9 +377,13 @@
         </p>
 
         <div class="question-actions">
-          <button (click)="openEditForm(item)">Edit</button>
+          <button type="button" (click)="openEditForm(item)">Edit</button>
 
-          <button class="delete-button" (click)="deleteQuestion(item)">
+          <button
+            type="button"
+            class="delete-button"
+            (click)="deleteQuestion(item)"
+          >
             Delete
           </button>
         </div>
