@@ -8,11 +8,108 @@
     </div>
 
     <div class="header-actions">
-      <button class="bulk-button" (click)="openBulkForm()">Bulk add</button>
+      <div class="menu-wrapper">
+        <button
+          class="menu-button"
+          (click)="showHeaderMenu = !showHeaderMenu"
+          aria-label="More actions"
+          [attr.aria-expanded]="showHeaderMenu"
+        >
+          ⋮
+        </button>
+
+        @if (showHeaderMenu) {
+          <div class="header-menu">
+            <button (click)="showHeaderMenu = false; openBulkForm()">
+              Bulk add
+            </button>
+
+            <button
+              (click)="showHeaderMenu = false; showImportForm = !showImportForm"
+            >
+              Import
+            </button>
+
+            <button (click)="showHeaderMenu = false; exportQuestions()">
+              Export
+            </button>
+          </div>
+        }
+      </div>
 
       <button class="add-button" (click)="openCreateForm()">+</button>
     </div>
   </header>
+
+  <!-- Import questions form -->
+  <section class="form-card import-card" *ngIf="showImportForm">
+    <div class="bulk-header">
+      <div>
+        <h2>Import questions</h2>
+        <p>Import questions into {{ category?.name }}.</p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Close import form"
+        (click)="showImportForm = false"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="import-section">
+      <label for="questions-import-file">Select JSON file</label>
+
+      <input
+        id="questions-import-file"
+        type="file"
+        accept=".json,application/json"
+        (change)="onImportFileSelected($event)"
+      />
+
+      <p class="field-hint" *ngIf="importFileName">
+        Selected: {{ importFileName }}
+      </p>
+
+      <div class="import-file-info" *ngIf="importQuestions.length > 0">
+        <span class="file-icon">📄</span>
+
+        <div>
+          <strong>{{ importQuestions.length }} questions found</strong>
+          <p>File validated and ready to import.</p>
+        </div>
+      </div>
+
+      <p class="error-message" *ngIf="importError">
+        {{ importError }}
+      </p>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="cancel-button"
+        (click)="showImportForm = false"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="save-button import-submit-button"
+        [disabled]="importQuestions.length === 0 || isImporting"
+        (click)="importQuestionsNow()"
+      >
+        {{ isImporting ? "Importing..." : "Import questions" }}
+      </button>
+    </div>
+  </section>
+
+  <p class="success-message" *ngIf="importMessage">
+    {{ importMessage }}
+  </p>
 
   <p class="success-message" *ngIf="bulkMessage && !showBulkForm">
     {{ bulkMessage }}
@@ -114,7 +211,7 @@
       <label>Other acceptable answers (optional)</label>
 
       <textarea
-        [(ngModel)]="acceptedAnswersText"
+        [(ngModel)]="item.acceptedAnswers"
         placeholder="Example: Dadabhai Nauroji, D. Naoroji"
         rows="2"
         maxlength="1000"

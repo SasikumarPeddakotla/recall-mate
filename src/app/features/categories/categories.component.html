@@ -2,13 +2,141 @@
   <header class="page-header">
     <button class="back-button" (click)="goBack()">←</button>
 
-    <div>
+    <div class="header-info">
       <h1>Categories</h1>
       <p>Organise your questions by topic</p>
     </div>
 
-    <button class="add-button" (click)="openCreateForm()">+</button>
+    <div class="header-actions">
+      <button class="bulk-button" (click)="showImportForm = !showImportForm">
+        Import
+      </button>
+
+      <button class="add-button" (click)="openCreateForm()">+</button>
+    </div>
   </header>
+
+  <p class="success-message" *ngIf="importMessage">
+    {{ importMessage }}
+  </p>
+
+  <!-- Import questions form -->
+  <section class="form-card import-card" *ngIf="showImportForm">
+    <div class="bulk-header">
+      <div>
+        <h2>Import questions</h2>
+        <p>Import questions from another RecallMate user.</p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Close import form"
+        (click)="showImportForm = false"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="import-section">
+      <label for="import-file">Select JSON file</label>
+
+      <input
+        id="import-file"
+        type="file"
+        accept=".json,application/json"
+        (change)="onImportFileSelected($event)"
+      />
+
+      <p class="field-hint" *ngIf="importFileName">
+        Selected: {{ importFileName }}
+      </p>
+
+      <div class="import-file-info" *ngIf="importQuestions.length > 0">
+        <span class="file-icon">📄</span>
+        <div>
+          <strong>{{ importQuestions.length }} questions found</strong>
+          <p>File validated and ready to import.</p>
+        </div>
+      </div>
+
+      <p class="error-message" *ngIf="importError">
+        {{ importError }}
+      </p>
+    </div>
+
+    <div class="import-section" *ngIf="importQuestions.length > 0">
+      <label for="import-category">Destination category</label>
+
+      <select
+        id="import-category"
+        [(ngModel)]="importTargetCategoryId"
+        [disabled]="createNewImportCategory"
+      >
+        <option [ngValue]="null">Select a category</option>
+
+        <option *ngFor="let item of categories" [ngValue]="item.id">
+          {{ item.name }}
+        </option>
+      </select>
+
+      <button
+        type="button"
+        class="create-category-toggle"
+        (click)="createNewImportCategory = !createNewImportCategory"
+      >
+        {{
+          createNewImportCategory
+            ? "← Choose existing category"
+            : "+ Create a new category"
+        }}
+      </button>
+
+      <div class="new-category-field" *ngIf="createNewImportCategory">
+        <label for="new-import-category">New category name</label>
+
+        <input
+          id="new-import-category"
+          type="text"
+          [(ngModel)]="newImportCategoryName"
+          placeholder="e.g. Modern History"
+          maxlength="60"
+        />
+
+        <label>Description (optional)</label>
+        <textarea
+          [(ngModel)]="newImportCategoryDescription"
+          placeholder="e.g. Authors and Books"
+          rows="3"
+          maxlength="200"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="cancel-button"
+        (click)="showImportForm = false"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="save-button import-submit-button"
+        [disabled]="
+          importQuestions.length === 0 ||
+          isImporting ||
+          (!createNewImportCategory && importTargetCategoryId === null) ||
+          (createNewImportCategory && !newImportCategoryName.trim())
+        "
+        (click)="importQuestionsNow()"
+      >
+        {{ isImporting ? "Importing..." : "Import questions" }}
+      </button>
+    </div>
+  </section>
 
   <!-- Create / Edit form -->
   <section class="form-card" *ngIf="showForm">

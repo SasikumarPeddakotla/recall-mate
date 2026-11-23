@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,6 +8,11 @@ import { Question } from '../../core/database/models/question.model';
 
 import { CategoryService } from '../categories/category.service';
 import { QuestionService } from './question.service';
+
+import {
+  QuestionImportService,
+  ImportQuestion,
+} from '../../core/services/question-import.service';
 
 interface BulkQuestion {
   question: string;
@@ -44,11 +49,31 @@ export class QuestionsComponent implements OnInit {
   isBulkSaving = false;
   bulkMessage = '';
 
+  // Import questions
+  showImportForm = false;
+  importQuestions: ImportQuestion[] = [];
+  importFileName = '';
+  isImporting = false;
+  importMessage = '';
+  importError = '';
+
+  showHeaderMenu = false;
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    if (!target.closest('.menu-wrapper')) {
+      this.showHeaderMenu = false;
+    }
+  }
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private categoryService: CategoryService,
     private questionService: QuestionService,
+    private questionImportService: QuestionImportService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -72,6 +97,41 @@ export class QuestionsComponent implements OnInit {
 
   async loadQuestions(): Promise<void> {
     this.questions = await this.questionService.getByCategory(this.categoryId);
+  }
+
+  async exportQuestions(): Promise<void> {
+    if (this.questions.length === 0) {
+      window.alert('There are no questions to export.');
+      return;
+    }
+
+    const exportData = {
+      format: 'RecallMate',
+      version: 1,
+      questions: this.questions.map((item) => ({
+        question: item.question,
+        answer: item.answer,
+        acceptedAnswers: item.acceptedAnswers ?? [],
+      })),
+    };
+
+    const json = JSON.stringify(exportData, null, 2);
+
+    const blob = new Blob([json], {
+      type: 'application/json',
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.category?.name || 'questions'}-questions.json`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
   }
 
   openCreateForm(): void {
@@ -186,7 +246,10 @@ export class QuestionsComponent implements OnInit {
       .map((item) => ({
         question: item.question.trim(),
         answer: item.answer.trim(),
-        acceptedAnswers: item.acceptedAnswers?.trim(),
+        acceptedAnswers: (item.acceptedAnswers ?? '')
+          .split(',')
+          .map((answer) => answer.trim())
+          .filter(Boolean),
       }))
       .filter((item) => item.question && item.answer);
 
@@ -215,6 +278,101 @@ export class QuestionsComponent implements OnInit {
       this.bulkMessage = 'Unable to save questions. Please try again.';
     } finally {
       this.isBulkSaving = false;
+    }
+  }
+
+  async onImportFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    this.importQuestions = [];
+    this.importFileName = '';
+    this.importError = '';
+    this.importMessage = '';
+
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.json')) {
+      this.importError = 'Please select a JSON file.';
+      input.value = '';
+      return;
+    }
+
+    try {
+      const content = await file.text();
+
+      this.importQuestions =
+        this.questionImportService.validateImportFile(content);
+
+      this.importFileName = file.name;
+    } catch (error) {
+      console.error('Import file validation failed:', error);
+
+      this.importError =
+        error instanceof Error
+          ? error.message
+          : 'Unable to read the selected file.';
+    } finally {
+      input.value = '';
+    }
+  }
+
+  async importQuestionsNow(): Promise<void> {
+    if (this.isImporting || this.importQuestions.length === 0) {
+      return;
+    }
+
+    if (!this.category?.id) {
+      this.importError = 'Unable to identify the current category.';
+      return;
+    }
+
+    this.importError = '';
+    this.importMessage = '';
+    this.isImporting = true;
+
+    try {
+      const categoryId = this.category.id;
+
+      const existingQuestions =
+        await this.questionService.getByCategory(categoryId);
+
+      const { uniqueQuestions, skippedCount } =
+        this.questionImportService.filterDuplicates(
+          this.importQuestions,
+          existingQuestions,
+        );
+
+      if (uniqueQuestions.length === 0) {
+        this.importMessage = `No new questions to import. All ${skippedCount} questions were duplicates.`;
+        return;
+      }
+
+      const importedCount = await this.questionService.createMany(
+        categoryId,
+        uniqueQuestions,
+      );
+
+      await this.loadQuestions();
+
+      this.importMessage =
+        `${importedCount} questions imported successfully. ` +
+        (skippedCount > 0
+          ? `${skippedCount} duplicate questions skipped.`
+          : '');
+
+      this.showImportForm = false;
+      this.importQuestions = [];
+      this.importFileName = '';
+    } catch (error) {
+      console.error('Failed to import questions:', error);
+
+      this.importError =
+        error instanceof Error
+          ? error.message
+          : 'Unable to import questions. Please try again.';
+    } finally {
+      this.isImporting = false;
     }
   }
 }

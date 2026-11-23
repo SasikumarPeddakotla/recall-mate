@@ -68,7 +68,11 @@ export class QuestionService {
 
   async createMany(
     categoryId: number,
-    questions: { question: string; answer: string }[],
+    questions: {
+      question: string;
+      answer: string;
+      acceptedAnswers?: string[];
+    }[],
   ): Promise<number> {
     const now = new Date();
 
@@ -76,17 +80,16 @@ export class QuestionService {
       categoryId,
       question: item.question.trim(),
       answer: item.answer.trim(),
-      acceptedAnswers: [],
+      acceptedAnswers: (item.acceptedAnswers ?? [])
+        .map((answer) => answer.trim())
+        .filter(Boolean),
       createdAt: now,
       updatedAt: now,
     }));
 
     return db.transaction('rw', db.questions, async () => {
-      const ids = await db.questions.bulkAdd(records, {
-        allKeys: true,
-      });
-
-      return ids.length;
+      await db.questions.bulkAdd(records);
+      return records.length;
     });
   }
 }
