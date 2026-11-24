@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +10,8 @@ import { CategoryService } from '../categories/category.service';
 import { QuestionService } from '../questions/question.service';
 
 import { PracticeResult } from './practice-result.model';
+
+type ResultFilter = 'all' | 'correct' | 'incorrect' | 'skipped';
 
 @Component({
   selector: 'app-practice',
@@ -36,6 +38,11 @@ export class PracticeComponent implements OnInit {
 
   results: PracticeResult[] = [];
   hasSkipped = false;
+
+  @ViewChild('answerInput')
+  answerInput?: ElementRef<HTMLTextAreaElement>;
+
+  resultFilter: ResultFilter = 'all';
 
   constructor(
     private route: ActivatedRoute,
@@ -99,6 +106,9 @@ export class PracticeComponent implements OnInit {
 
     this.hasChecked = true;
 
+    // Close the mobile keyboard after checking the answer.
+    this.answerInput?.nativeElement.blur();
+
     this.results.push({
       question: this.currentQuestion!,
       userAnswer: this.userAnswer.trim(),
@@ -129,6 +139,11 @@ export class PracticeComponent implements OnInit {
     if (this.currentIndex < this.questions.length - 1) {
       this.currentIndex++;
       this.resetCurrentQuestion();
+
+      // Focus the answer field for the next question.
+      setTimeout(() => {
+        this.answerInput?.nativeElement.focus();
+      }, 0);
     } else {
       this.isCompleted = true;
     }
@@ -210,5 +225,30 @@ export class PracticeComponent implements OnInit {
       userAnswer: '',
       status: 'skipped',
     });
+  }
+
+  // Handles the Enter key on the mobile or physical keyboard.
+  onAnswerEnter(event: KeyboardEvent): void {
+    // Allow Shift + Enter to insert a new line.
+    if (event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    this.checkAnswer();
+  }
+
+  // Changes the result filter.
+  setResultFilter(filter: ResultFilter): void {
+    this.resultFilter = filter;
+  }
+
+  // Returns results matching the selected filter.
+  get filteredResults(): PracticeResult[] {
+    if (this.resultFilter === 'all') {
+      return this.results;
+    }
+
+    return this.results.filter((item) => item.status === this.resultFilter);
   }
 }

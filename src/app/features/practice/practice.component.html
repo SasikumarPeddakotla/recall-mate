@@ -95,9 +95,39 @@
           <p>See what you got right and what needs more practice.</p>
         </div>
 
+        <div class="result-filters">
+          <button
+            [class.active]="resultFilter === 'all'"
+            (click)="setResultFilter('all')"
+          >
+            All ({{ results.length }})
+          </button>
+
+          <button
+            [class.active]="resultFilter === 'correct'"
+            (click)="setResultFilter('correct')"
+          >
+            Correct ({{ correctCount }})
+          </button>
+
+          <button
+            [class.active]="resultFilter === 'incorrect'"
+            (click)="setResultFilter('incorrect')"
+          >
+            Wrong ({{ incorrectCount }})
+          </button>
+
+          <button
+            [class.active]="resultFilter === 'skipped'"
+            (click)="setResultFilter('skipped')"
+          >
+            Skipped ({{ skippedCount }})
+          </button>
+        </div>
+
         <article
           class="review-card"
-          *ngFor="let result of results; let i = index"
+          *ngFor="let result of filteredResults; let i = index"
           [ngClass]="result.status"
         >
           <div class="review-card-header">
@@ -165,9 +195,12 @@
         <label for="answer-input">Your answer</label>
 
         <textarea
+          #answerInput
           id="answer-input"
           [(ngModel)]="userAnswer"
           [disabled]="hasChecked || hasSkipped"
+          (keydown.enter)="onAnswerEnter($any($event))"
+          enterkeyhint="go"
           placeholder="Type your answer here..."
           rows="3"
           maxlength="1000"
