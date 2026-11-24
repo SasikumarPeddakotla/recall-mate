@@ -212,7 +212,7 @@ export class QuestionsComponent implements OnInit {
     this.editingId = question.id!;
     this.questionText = question.question;
     this.answerText = question.answer;
-    this.acceptedAnswersText = (question.acceptedAnswers ?? []).join(', ');
+    this.acceptedAnswersText = (question.acceptedAnswers ?? []).join('\n');
     this.showForm = true;
   }
 
@@ -223,8 +223,8 @@ export class QuestionsComponent implements OnInit {
     if (!question || !answer) return;
 
     const acceptedAnswers = this.acceptedAnswersText
-      .split(',')
-      .map((item) => item.trim())
+      .split('\n')
+      .map((answer) => answer.trim())
       .filter(Boolean);
 
     if (this.editingId !== null) {
@@ -331,7 +331,7 @@ export class QuestionsComponent implements OnInit {
         question: item.question.trim(),
         answer: item.answer.trim(),
         acceptedAnswers: (item.acceptedAnswers ?? '')
-          .split(',')
+          .split('\n')
           .map((answer) => answer.trim())
           .filter(Boolean),
       }))
