@@ -18,6 +18,11 @@ export class RecallMateDatabase extends Dexie {
       categories: '++id, name, createdAt',
       questions: '++id, categoryId, createdAt',
     });
+
+    this.version(3).stores({
+      categories: '++id, name, createdAt',
+      questions: '++id, categoryId, createdAt, isBookmarked',
+    });
   }
 }
 

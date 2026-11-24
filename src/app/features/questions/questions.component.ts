@@ -36,6 +36,10 @@ export class QuestionsComponent implements OnInit {
   // Question search
   searchTerm = '';
 
+  // Question filter
+  showBookmarkedOnly = false;
+  showFilterMenu = false;
+
   showForm = false;
   editingId: number | null = null;
 
@@ -68,6 +72,10 @@ export class QuestionsComponent implements OnInit {
 
     if (!target.closest('.menu-wrapper')) {
       this.showHeaderMenu = false;
+    }
+
+    if (!target.closest('.filter-menu-wrapper')) {
+      this.showFilterMenu = false;
     }
   }
 
@@ -102,15 +110,35 @@ export class QuestionsComponent implements OnInit {
     this.questions = await this.questionService.getByCategory(this.categoryId);
   }
 
-  // Returns questions matching the search term.
+  // Toggles the bookmark status of a question.
+  async toggleBookmark(question: Question): Promise<void> {
+    if (!question.id) {
+      return;
+    }
+
+    await this.questionService.toggleBookmark(question.id);
+
+    // Update the displayed icon immediately.
+    question.isBookmarked = !question.isBookmarked;
+  }
+
+  // Returns questions matching the selected filter and search term.
   get filteredQuestions(): Question[] {
+    let filtered = this.questions;
+
+    // Apply bookmark filter.
+    if (this.showBookmarkedOnly) {
+      filtered = filtered.filter((item) => item.isBookmarked === true);
+    }
+
+    // Apply search filter.
     const term = this.searchTerm.trim().toLowerCase();
 
     if (!term) {
-      return this.questions;
+      return filtered;
     }
 
-    return this.questions.filter((item) => {
+    return filtered.filter((item) => {
       const question = item.question.toLowerCase();
       const answer = item.answer.toLowerCase();
 
@@ -122,6 +150,17 @@ export class QuestionsComponent implements OnInit {
         question.includes(term) || answer.includes(term) || acceptedAnswers
       );
     });
+  }
+
+  // Selects whether to show all or bookmarked questions.
+  setBookmarkFilter(bookmarkedOnly: boolean): void {
+    this.showBookmarkedOnly = bookmarkedOnly;
+    this.showFilterMenu = false;
+  }
+
+  // Returns the number of questions currently displayed.
+  get filteredQuestionCount(): number {
+    return this.filteredQuestions.length;
   }
 
   // Clears the question search.
@@ -236,6 +275,21 @@ export class QuestionsComponent implements OnInit {
 
   startPractice(): void {
     this.router.navigate(['/categories', this.categoryId, 'practice']);
+  }
+
+  // Starts a practice session with bookmarked questions only.
+  startBookmarkedPractice(): void {
+    const bookmarkedCount = this.questions.filter(
+      (question) => question.isBookmarked,
+    ).length;
+
+    if (bookmarkedCount === 0) {
+      return;
+    }
+
+    this.router.navigate(['/categories', this.categoryId, 'practice'], {
+      queryParams: { bookmarks: true },
+    });
   }
 
   openBulkForm(): void {
@@ -404,5 +458,15 @@ export class QuestionsComponent implements OnInit {
     } finally {
       this.isImporting = false;
     }
+  }
+
+  // Returns the number of bookmarked questions.
+  get bookmarkedCount(): number {
+    return this.questions.filter((item) => item.isBookmarked === true).length;
+  }
+
+  // Checks whether the category has bookmarked questions.
+  get hasBookmarkedQuestions(): boolean {
+    return this.bookmarkedCount > 0;
   }
 }

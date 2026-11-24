@@ -92,4 +92,28 @@ export class QuestionService {
       return records.length;
     });
   }
+
+  // Toggles the bookmark status of a question.
+  async toggleBookmark(questionId: number): Promise<void> {
+    const question = await db.questions.get(questionId);
+
+    if (!question) {
+      return;
+    }
+
+    await db.questions.update(questionId, {
+      isBookmarked: !question.isBookmarked,
+      updatedAt: new Date(),
+    });
+  }
+
+  // Returns bookmarked questions from a category.
+  async getBookmarkedByCategory(categoryId: number): Promise<Question[]> {
+    const questions = await db.questions
+      .where('categoryId')
+      .equals(categoryId)
+      .toArray();
+
+    return questions.filter((question) => question.isBookmarked === true);
+  }
 }

@@ -125,6 +125,14 @@
           </button>
         </div>
 
+        <button
+          class="bulk-bookmark-button"
+          type="button"
+          (click)="toggleFilteredBookmarks()"
+        >
+          ★ {{ bulkBookmarkLabel }}
+        </button>
+
         <article
           class="review-card"
           *ngFor="let result of filteredResults; let i = index"
@@ -136,6 +144,21 @@
             <span class="review-status" [ngClass]="result.status">
               {{ result.status | titlecase }}
             </span>
+
+            <button
+              class="review-bookmark-button"
+              type="button"
+              [class.bookmarked]="result.question.isBookmarked"
+              (click)="toggleResultBookmark(result)"
+              [attr.aria-label]="
+                result.question.isBookmarked
+                  ? 'Remove bookmark'
+                  : 'Bookmark question'
+              "
+              [attr.aria-pressed]="!!result.question.isBookmarked"
+            >
+              {{ result.question.isBookmarked ? "★" : "☆" }}
+            </button>
           </div>
 
           <h3>{{ result.question.question }}</h3>

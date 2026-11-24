@@ -44,6 +44,8 @@ export class PracticeComponent implements OnInit {
 
   resultFilter: ResultFilter = 'all';
 
+  isBookmarkPractice = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -67,9 +69,16 @@ export class PracticeComponent implements OnInit {
       return;
     }
 
+    this.isBookmarkPractice =
+      this.route.snapshot.queryParamMap.get('bookmarks') === 'true';
+
     const savedQuestions = await this.questionService.getByCategory(id);
 
-    this.questions = this.shuffleQuestions(savedQuestions);
+    const practiceQuestions = this.isBookmarkPractice
+      ? savedQuestions.filter((question) => question.isBookmarked === true)
+      : savedQuestions;
+
+    this.questions = this.shuffleQuestions(practiceQuestions);
     this.isLoading = false;
   }
 
@@ -250,5 +259,60 @@ export class PracticeComponent implements OnInit {
     }
 
     return this.results.filter((item) => item.status === this.resultFilter);
+  }
+
+  // Toggles the bookmark for an individual reviewed question.
+  async toggleResultBookmark(result: PracticeResult): Promise<void> {
+    const questionId = result.question.id;
+
+    if (!questionId) {
+      return;
+    }
+
+    await this.questionService.toggleBookmark(questionId);
+    result.question.isBookmarked = !result.question.isBookmarked;
+  }
+
+  // Checks whether all questions in the selected filter are bookmarked.
+  get areAllFilteredResultsBookmarked(): boolean {
+    return (
+      this.filteredResults.length > 0 &&
+      this.filteredResults.every((item) => item.question.isBookmarked === true)
+    );
+  }
+
+  // Returns the appropriate bulk toggle button label.
+  get bulkBookmarkLabel(): string {
+    const action = this.areAllFilteredResultsBookmarked ? 'Remove' : 'Bookmark';
+
+    switch (this.resultFilter) {
+      case 'correct':
+        return `${action} Correct Questions`;
+
+      case 'incorrect':
+        return `${action} Wrong Questions`;
+
+      case 'skipped':
+        return `${action} Skipped Questions`;
+
+      default:
+        return `${action} All Questions`;
+    }
+  }
+
+  // Toggles bookmarks for all questions in the selected filter.
+  async toggleFilteredBookmarks(): Promise<void> {
+    const shouldBookmark = !this.areAllFilteredResultsBookmarked;
+
+    for (const result of this.filteredResults) {
+      const question = result.question;
+
+      if (!question.id || question.isBookmarked === shouldBookmark) {
+        continue;
+      }
+
+      await this.questionService.toggleBookmark(question.id);
+      question.isBookmarked = shouldBookmark;
+    }
   }
 }

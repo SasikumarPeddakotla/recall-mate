@@ -4,6 +4,7 @@ export interface Question {
   question: string;
   answer: string;
   acceptedAnswers?: string[];
+  isBookmarked?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -309,52 +309,115 @@
   >
     <div class="empty-icon">🔍</div>
 
-    <h2>No matching questions</h2>
+    <h2>
+      {{
+        showBookmarkedOnly && !searchTerm.trim()
+          ? "No bookmarked questions"
+          : "No matching questions"
+      }}
+    </h2>
 
-    <p>We couldn't find any questions matching "{{ searchTerm }}".</p>
+    <p>
+      {{
+        showBookmarkedOnly && !searchTerm.trim()
+          ? "Bookmark some questions to see them here."
+          : "We couldn't find any questions matching your search and filter."
+      }}
+    </p>
 
     <button type="button" class="save-button" (click)="clearSearch()">
       Clear search
     </button>
+
+    <button
+      *ngIf="showBookmarkedOnly"
+      type="button"
+      class="cancel-button"
+      (click)="setBookmarkFilter(false)"
+    >
+      Show all questions
+    </button>
   </section>
 
-  <!-- Start practice -->
-  <button
-    class="practice-button"
-    type="button"
-    *ngIf="questions.length > 0"
-    (click)="startPractice()"
-  >
-    Start practice →
-  </button>
+  <!-- Practice buttons -->
+  <div class="practice-actions" *ngIf="questions.length > 0">
+    <button
+      class="practice-bookmarks-button"
+      type="button"
+      [disabled]="!hasBookmarkedQuestions"
+      (click)="startBookmarkedPractice()"
+    >
+      Practice bookmarks ({{ bookmarkedCount }})
+    </button>
+    <button class="practice-button" type="button" (click)="startPractice()">
+      Practice all →
+    </button>
+  </div>
 
-  <!-- Question search -->
+  <!-- Question search and filter -->
   <section class="question-search" *ngIf="questions.length > 0">
-    <div class="search-input-wrapper">
-      <span class="search-icon" aria-hidden="true">⌕</span>
+    <div class="search-toolbar">
+      <div class="search-input-wrapper">
+        <span class="search-icon" aria-hidden="true">⌕</span>
 
-      <input
-        type="search"
-        [(ngModel)]="searchTerm"
-        placeholder="Search questions or answers..."
-        aria-label="Search questions, answers, and alternative answers"
-        autocomplete="off"
-      />
+        <input
+          type="search"
+          [(ngModel)]="searchTerm"
+          placeholder="Search questions or answers..."
+          aria-label="Search questions, answers, and alternative answers"
+          autocomplete="off"
+        />
 
-      <button
-        *ngIf="searchTerm"
-        type="button"
-        class="clear-search-button"
-        (click)="clearSearch()"
-        aria-label="Clear question search"
-      >
-        ×
-      </button>
+        <button
+          *ngIf="searchTerm"
+          type="button"
+          class="clear-search-button"
+          (click)="clearSearch()"
+          aria-label="Clear question search"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="filter-menu-wrapper">
+        <button
+          type="button"
+          class="filter-button"
+          [class.active]="showBookmarkedOnly"
+          (click)="showFilterMenu = !showFilterMenu"
+          aria-label="Filter questions"
+          [attr.aria-expanded]="showFilterMenu"
+        >
+          <span>☷</span>
+        </button>
+
+        <div class="filter-dropdown" *ngIf="showFilterMenu">
+          <button
+            type="button"
+            [class.selected]="!showBookmarkedOnly"
+            (click)="setBookmarkFilter(false)"
+          >
+            <span>All questions</span>
+            <span class="filter-option-count">{{ questions.length }}</span>
+            <span *ngIf="!showBookmarkedOnly">✓</span>
+          </button>
+
+          <button
+            type="button"
+            [class.selected]="showBookmarkedOnly"
+            (click)="setBookmarkFilter(true)"
+          >
+            <span>★ Bookmarked questions</span>
+            <span class="filter-option-count">{{ bookmarkedCount }}</span>
+            <span *ngIf="showBookmarkedOnly">✓</span>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <p class="search-count" *ngIf="searchTerm.trim()">
-      {{ filteredQuestions.length }}
-      {{ filteredQuestions.length === 1 ? "question" : "questions" }}
+    <p class="search-count" *ngIf="searchTerm.trim() || showBookmarkedOnly">
+      {{ filteredQuestionCount }}
+      {{ filteredQuestionCount === 1 ? "question" : "questions" }}
       found
     </p>
   </section>
@@ -388,6 +451,19 @@
           </button>
         </div>
       </div>
+
+      <button
+        type="button"
+        class="bookmark-button"
+        [class.bookmarked]="item.isBookmarked"
+        (click)="toggleBookmark(item)"
+        [attr.aria-label]="
+          item.isBookmarked ? 'Remove bookmark' : 'Bookmark question'
+        "
+        [attr.aria-pressed]="!!item.isBookmarked"
+      >
+        {{ item.isBookmarked ? "★" : "☆" }}
+      </button>
     </article>
   </section>
 </div>
