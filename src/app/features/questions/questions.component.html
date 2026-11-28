@@ -246,16 +246,19 @@
         maxlength="1000"
       ></textarea>
 
-      <label>Other acceptable answers (optional)</label>
+      <label for="accepted-answers">Other acceptable answers (optional)</label>
 
       <textarea
-        [(ngModel)]="item.acceptedAnswers"
-        placeholder="Example: Dadabhai Nauroji, D. Naoroji"
-        rows="2"
+        id="accepted-answers"
+        [(ngModel)]="acceptedAnswersText"
+        placeholder="Enter each answer on a new line&#10;Example:&#10;Dadabhai Nauroji&#10;D. Naoroji"
+        rows="4"
         maxlength="1000"
       ></textarea>
 
-      <p class="field-hint">Separate alternative answers with commas.</p>
+      <p class="field-hint">
+        Enter each alternative answer on a separate line.
+      </p>
     </article>
 
     <button
