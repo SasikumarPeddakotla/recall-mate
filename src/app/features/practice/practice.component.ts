@@ -328,4 +328,22 @@ export class PracticeComponent implements OnInit {
 
     this.currentQuestion!.isBookmarked = !this.currentQuestion!.isBookmarked;
   }
+
+  // Returns accepted answers other than the answer the user submitted.
+  get remainingAcceptedAnswers(): string[] {
+    const submittedAnswer = this.normalize(this.userAnswer);
+
+    const allAnswers = [
+      this.currentQuestion?.answer,
+      ...(this.currentQuestion?.acceptedAnswers ?? []),
+    ].filter((answer): answer is string => !!answer);
+
+    if (this.answerRevealed || this.hasSkipped || !this.isCorrect) {
+      allAnswers.shift();
+    }
+
+    return allAnswers.filter(
+      (answer) => this.normalize(answer) !== submittedAnswer,
+    );
+  }
 }

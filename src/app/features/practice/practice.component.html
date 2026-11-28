@@ -308,6 +308,23 @@
           <h3>{{ currentQuestion.answer }}</h3>
         </div>
 
+        <!-- Other accepted answers -->
+        <div
+          class="accepted-answers-card"
+          *ngIf="
+            (hasChecked || answerRevealed || hasSkipped) &&
+            remainingAcceptedAnswers.length > 1
+          "
+        >
+          <p>Other acceptable answers</p>
+
+          <ul>
+            <li *ngFor="let answer of remainingAcceptedAnswers">
+              {{ answer }}
+            </li>
+          </ul>
+        </div>
+
         <!-- Show answer -->
         <button
           class="reveal-button"

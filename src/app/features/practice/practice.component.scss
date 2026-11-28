@@ -640,3 +640,33 @@
 .question-bookmark-button:active {
   transform: scale(0.95);
 }
+
+.accepted-answers-card {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+
+  p {
+    margin: 0 0 10px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 6px;
+    color: var(--color-text-primary);
+    font-size: 14px;
+  }
+
+  li:last-child {
+    margin-bottom: 0;
+  }
+}
