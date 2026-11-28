@@ -172,6 +172,18 @@
             <p>Correct answer</p>
             <strong>{{ result.question.answer }}</strong>
           </div>
+
+          <div
+            class="review-answer"
+            *ngIf="result.question.acceptedAnswers?.length"
+          >
+            <p>Accepted answers</p>
+            <strong
+              *ngFor="let acceptedAnswer of result.question.acceptedAnswers"
+            >
+              {{ acceptedAnswer }} <br />
+            </strong>
+          </div>
         </article>
       </section>
     </section>
