@@ -315,4 +315,17 @@ export class PracticeComponent implements OnInit {
       question.isBookmarked = shouldBookmark;
     }
   }
+
+  // Toggles the bookmark for the currently displayed question.
+  async toggleCurrentBookmark(): Promise<void> {
+    const questionId = this.currentQuestion?.id;
+
+    if (!questionId) {
+      return;
+    }
+
+    await this.questionService.toggleBookmark(questionId);
+
+    this.currentQuestion!.isBookmarked = !this.currentQuestion!.isBookmarked;
+  }
 }

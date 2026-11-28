@@ -208,7 +208,24 @@
 
       <!-- Question -->
       <section class="question-card">
-        <p class="eyebrow">YOUR QUESTION</p>
+        <div class="question-card-header">
+          <p class="eyebrow">YOUR QUESTION</p>
+
+          <button
+            class="question-bookmark-button"
+            type="button"
+            [class.bookmarked]="currentQuestion.isBookmarked"
+            (click)="toggleCurrentBookmark()"
+            [attr.aria-label]="
+              currentQuestion.isBookmarked
+                ? 'Remove bookmark'
+                : 'Bookmark question'
+            "
+            [attr.aria-pressed]="!!currentQuestion.isBookmarked"
+          >
+            {{ currentQuestion.isBookmarked ? "★" : "☆" }}
+          </button>
+        </div>
 
         <h2>{{ currentQuestion.question }}</h2>
       </section>

@@ -131,7 +131,7 @@
 }
 
 .question-card h2 {
-  margin: 16px 0 0;
+  margin: 10px 0 0;
   font-size: clamp(20px, 5vw, 24px);
   line-height: 1.5;
   font-weight: 650;
@@ -606,4 +606,37 @@
   .result-stat strong {
     font-size: 20px;
   }
+}
+
+.question-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.question-card-header .eyebrow {
+  margin: 0;
+}
+
+.question-bookmark-button {
+  flex-shrink: 0;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: 25px;
+  transition: all 0.2s ease;
+
+  &.bookmarked {
+    color: #e5a000;
+  }
+}
+
+.question-bookmark-button:active {
+  transform: scale(0.95);
 }
