@@ -171,6 +171,16 @@
 .answer-preview {
   color: var(--color-text-secondary);
   font-size: 12px;
+  font-weight: bold;
+
+  line-height: 1.5;
+  margin: 0;
+  margin-bottom: 5px;
+}
+
+.accepted-answers-preview {
+  color: var(--color-text-secondary);
+  font-size: 11px;
   line-height: 1.5;
   margin: 0;
 }

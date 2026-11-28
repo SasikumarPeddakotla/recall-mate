@@ -439,6 +439,13 @@
           {{ item.answer }}
         </p>
 
+        <p
+          class="accepted-answers-preview"
+          *ngFor="let acceptedAnswer of item.acceptedAnswers"
+        >
+          {{ acceptedAnswer }}
+        </p>
+
         <div class="question-actions">
           <button type="button" (click)="openEditForm(item)">Edit</button>
 
